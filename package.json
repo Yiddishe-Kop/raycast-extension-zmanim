@@ -17,6 +17,25 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "geonameid",
+      "title": "Location",
+      "description": "Location to show zmanim for",
+      "required": true,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Jerusalem",
+          "value": "281184"
+        },
+        {
+          "title": "Bet Shemesh",
+          "value": "295432"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.45.1",
     "got": "^12.5.3"

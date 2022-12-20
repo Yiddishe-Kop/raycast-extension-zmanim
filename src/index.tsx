@@ -1,4 +1,4 @@
-import { Detail, showToast, Toast } from "@raycast/api"
+import { Detail, showToast, Toast, getPreferenceValues } from "@raycast/api"
 import { useEffect, useState } from "react";
 import got from 'got';
 
@@ -10,6 +10,10 @@ interface HebcalItem {
   subcat?: string;
   link?: string;
   memo?: string;
+}
+
+interface Preferences {
+  geonameid: string;
 }
 
 interface State {
@@ -30,10 +34,12 @@ export default function Command() {
         title: "Fetching Zmanim",
       });
 
+      const preferences = getPreferenceValues<Preferences>();
+
       try {
         const { body } = await got.get("https://www.hebcal.com/hebcal", {
           searchParams: {
-            geonameid: 281184,
+            geonameid: preferences.geonameid,
             cfg: 'json',
             start: date.toISOString(),
             end: date.toISOString(),
