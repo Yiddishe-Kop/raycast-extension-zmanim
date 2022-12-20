@@ -3,7 +3,7 @@
   "name": "zmanim",
   "title": "Zmanim",
   "description": "Quickly show todays zmanim",
-  "icon": "command-icon.png",
+  "icon": "icon.svg",
   "author": "Yiddishe-Kop",
   "categories": [
     "Data"
