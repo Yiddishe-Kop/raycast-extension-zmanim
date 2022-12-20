@@ -37,7 +37,7 @@ export default function Command() {
       const preferences = getPreferenceValues<Preferences>();
 
       try {
-        const { body } = await got.get("https://www.hebcal.com/hebcal", {
+        const response = await got.get("https://www.hebcal.com/hebcal", {
           searchParams: {
             geonameid: preferences.geonameid,
             cfg: 'json',
@@ -54,6 +54,8 @@ export default function Command() {
           },
           responseType: "json",
         });
+
+        const body = response.body as any;
 
         let markdown = `# Today's Zmanim for ${body.location.title}`
 
@@ -89,7 +91,7 @@ ${new Date(item.date).toLocaleTimeString()}
   return <Detail markdown={state.markdown} isLoading={!state.markdown} navigationTitle={`Zmanim for ${today.toLocaleDateString()}`}
     metadata={
       <Detail.Metadata>
-        {state.items?.map((item) => (
+        {state.items?.map((item, i) => (
           <>
             <Detail.Metadata.Label title={item.category} text={item.hebrew} icon="Clock" />
             <Detail.Metadata.Label title="" text={item.title} />
