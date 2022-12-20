@@ -1,10 +1,98 @@
-import { Detail } from "@raycast/api"
+import { Detail, showToast, Toast } from "@raycast/api"
+import { useEffect, useState } from "react";
+import got from 'got';
+
+interface HebcalItem {
+  title: string;
+  date: string;
+  hebrew: string;
+  category: string;
+  subcat?: string;
+  link?: string;
+  memo?: string;
+}
+
+interface State {
+  items?: HebcalItem[];
+  markdown?: string;
+}
 
 export default function Command() {
   const today = new Date()
 
-  let markdown = `# Zmanim for ${today.toLocaleDateString()}\n`
-  markdown += `### Sunrise: ${today.toLocaleTimeString()}`
-    
-  return <Detail markdown={markdown} isLoading={true}  />;
+  const [state, setState] = useState<State>({});
+
+  useEffect(() => {
+    async function getZmanim(date: Date) {
+
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Fetching Zmanim",
+      });
+
+      try {
+        const { body } = await got.get("https://www.hebcal.com/hebcal", {
+          searchParams: {
+            geonameid: 281184,
+            cfg: 'json',
+            start: date.toISOString(),
+            end: date.toISOString(),
+            maj: 'on',
+            min: 'on',
+            nx: 'on',
+            mf: 'on',
+            ss: 'on',
+            d: 'on',
+            F: 'on',
+            v: 1
+          },
+          responseType: "json",
+        });
+
+        let markdown = `# Today's Zmanim for ${body.location.title}`
+
+        for (const item of body.items) {
+          markdown += `
+### ${item.title}
+${item.hebrew}
+
+${new Date(item.date).toLocaleTimeString()}
+
+---
+`
+        }
+
+        // setState({ markdown: `\`\`\`${JSON.stringify(body, null, 2)}\`\`\`` });
+        setState({ markdown, items: body.items });
+
+
+        toast.style = Toast.Style.Success;
+        toast.title = "Fetched Zmanim";
+        toast.message = '🚀🚀🚀';
+
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to fetch Zmanim";
+        toast.message = String(error);
+      }
+    }
+
+    getZmanim(today);
+  }, []);
+
+  return <Detail markdown={state.markdown} isLoading={!state.markdown} navigationTitle={`Zmanim for ${today.toLocaleDateString()}`}
+    metadata={
+      <Detail.Metadata>
+        {state.items?.map((item) => (
+          <>
+            <Detail.Metadata.Label title={item.category} text={item.hebrew} icon="Clock" />
+            <Detail.Metadata.Label title="" text={item.title} />
+            {item.link && <Detail.Metadata.Link title={item.category} target={item.link} text={item.link} />}
+            <Detail.Metadata.Separator />
+          </>
+        ))}
+      </Detail.Metadata>
+    } />
 }
+
+
